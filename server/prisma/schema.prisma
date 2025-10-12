@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  user_id             Int       @id @default(autoincrement())
+  full_name           String
+  document            String    @unique
+  email               String    @unique
+  password            String
+  type_of_user        String
+  has_full_permission Boolean
+  routinesAsUser      Routine[] @relation("UserRoutines")
+  routinesAsGuardian  Routine[] @relation("GuardianRoutines")
+
+  @@map("Users")
+}
+
+model Routine {
+  routine_id    Int        @id @default(autoincrement())
+  user_id       Int
+  guardian_id   Int
+  creation_date DateTime   @default(now())
+  description   String?
+  user          User       @relation("UserRoutines", fields: [user_id], references: [user_id])
+  guardian      User       @relation("GuardianRoutines", fields: [guardian_id], references: [user_id])
+  activities    Activity[]
+
+  @@map("Routines")
+}
+
+model Activity {
+  activity_id   Int                @id @default(autoincrement())
+  routine_id    Int
+  title         String
+  description   String?
+  activity_task Boolean
+  routine       Routine            @relation(fields: [routine_id], references: [routine_id], onDelete: Cascade)
+  schedules     ActivitySchedule[]
+
+  @@map("Activities")
+}
+
+model ActivitySchedule {
+  activity_schedule_id Int         @id @default(autoincrement())
+  activity_id          Int
+  start_time           DateTime?
+  end_time             DateTime?
+  activity             Activity    @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade)
+  days_of_week         DayOfWeek[]
+
+  @@map("ActivitySchedules")
+}
+
+model DayOfWeek {
+  day_of_week_id       Int              @id @default(autoincrement())
+  activity_schedule_id Int
+  day                  String
+  activitySchedule     ActivitySchedule @relation(fields: [activity_schedule_id], references: [activity_schedule_id], onDelete: Cascade)
+
+  @@map("DaysOfWeek")
+}
