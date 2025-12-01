@@ -1,50 +1,124 @@
-# Welcome to your Expo app 👋
+# MyWay
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## 🚀 Como Rodar o Projeto
 
-## Get started
+### Pré-requisitos
 
-1. Install dependencies
+- Node.js instalado
+- Expo CLI instalado globalmente (`npm install -g expo-cli`)
 
-   ```bash
-   npm install
-   ```
+### Backend (Server)
 
-2. Start the app
-
-   ```bash
-    npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+1. Navegue até a pasta do servidor:
 
 ```bash
-npm run reset-project
+cd server
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+2. Instale as dependências:
 
-## Learn more
+```bash
+npm install
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+3. Configure o banco de dados:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npx prisma migrate reset
+```
 
-## Join the community
+Este comando irá resetar o banco de dados, aplicar todas as migrações e executar o seed com dados iniciais.
 
-Join our community of developers creating universal apps.
+4. Inicie o servidor:
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+npm run dev
+```
+
+O servidor estará rodando em `http://localhost:3000`
+
+### Frontend (Mobile)
+
+1. Navegue até a pasta do mobile:
+
+```bash
+cd mobile
+```
+
+2. Instale as dependências:
+
+```bash
+npm install
+```
+
+3. **Configure o IP do servidor:**
+
+   Abra o arquivo `mobile/services/api.tsx` e atualize o IP para corresponder ao IP local da sua máquina:
+
+   ```typescript
+   export const baseUrlSelect = () => {
+     if (useLocalhost) return `http://SEU_IP_LOCAL:3000`; // Ex: http://192.168.0.146:3000
+     return "";
+   };
+   ```
+
+   Para descobrir seu IP local, execute no terminal:
+
+   ```bash
+   ipconfig getifaddr en0
+   ```
+
+   ⚠️ **Importante:** O IP configurado no `api.tsx` deve ser o mesmo IP da máquina onde o servidor está rodando.
+
+4. Inicie o aplicativo:
+
+```bash
+npm start
+```
+
+5. Escolha como visualizar o app:
+   - Pressione `i` para abrir no iOS Simulator
+   - Pressione `a` para abrir no Android Emulator
+   - Escaneie o QR Code com o app Expo Go no seu dispositivo físico
+
+## 📝 Comandos Úteis
+
+### Server
+
+- `npm run dev` - Inicia o servidor em modo desenvolvimento
+- `npm run build` - Compila o TypeScript
+- `npm start` - Inicia o servidor compilado
+- `npx prisma migrate reset` - Reseta o banco de dados
+- `npx prisma studio` - Abre interface visual do banco de dados
+
+### Mobile
+
+- `npm start` - Inicia o Expo
+- `npm run ios` - Inicia diretamente no iOS
+- `npm run android` - Inicia diretamente no Android
+
+## Recomendações para criar login e credenciais
+
+### Login Aluno 1
+
+- nome: Aluno 1
+- Email: aluno1@gmail.com
+- RA: 202111020012
+- Senha: 123456
+
+### Login Aluno 2
+
+- nome: Aluno 2
+- Email: aluno2@gmail.com
+- RA: 202111020013
+- Senha: 123456
+
+## Login Pai
+
+- Email: pai@gmail.com
+- RA: 123456789000
+- Senha: 123456
+
+### Recomendações
+
+- criar o Login do pai com um RA diferente dos alunos para evitar conflitos. Criar login do pai primeiro depois os alunos.
