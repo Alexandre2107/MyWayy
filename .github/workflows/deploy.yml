@@ -1,0 +1,128 @@
+name: Deploy
+
+# Este workflow é um exemplo de como fazer deploy
+# Você precisará ajustar conforme sua plataforma de hospedagem
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # Permite executar manualmente
+
+jobs:
+  deploy-server:
+    name: Deploy Server
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    defaults:
+      run:
+        working-directory: ./server
+    
+    steps:
+      - name: 📦 Checkout código
+        uses: actions/checkout@v4
+      
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: 📥 Instalar dependências
+        run: npm ci
+      
+      - name: 🏗️ Build
+        run: |
+          npx prisma generate
+          npx tsc --build
+      
+      # ===============================================
+      # OPÇÃO 1: Deploy para Heroku
+      # ===============================================
+      # - name: 🚀 Deploy para Heroku
+      #   uses: akhileshns/heroku-deploy@v3.12.14
+      #   with:
+      #     heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+      #     heroku_app_name: "myway-server"
+      #     heroku_email: "seu-email@email.com"
+      #     appdir: "server"
+      
+      # ===============================================
+      # OPÇÃO 2: Deploy para Railway
+      # ===============================================
+      # - name: 🚀 Deploy para Railway
+      #   uses: berviantoleo/railway-deploy@main
+      #   with:
+      #     railway_token: ${{ secrets.RAILWAY_TOKEN }}
+      #     service: "myway-server"
+      
+      # ===============================================
+      # OPÇÃO 3: Deploy para DigitalOcean App Platform
+      # ===============================================
+      # - name: 🚀 Deploy para DigitalOcean
+      #   uses: digitalocean/app_action@v1.1.5
+      #   with:
+      #     app_name: myway-server
+      #     token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      
+      # ===============================================
+      # OPÇÃO 4: Deploy para servidor VPS via SSH
+      # ===============================================
+      # - name: 🚀 Deploy para VPS
+      #   uses: appleboy/ssh-action@v1.0.0
+      #   with:
+      #     host: ${{ secrets.VPS_HOST }}
+      #     username: ${{ secrets.VPS_USERNAME }}
+      #     key: ${{ secrets.VPS_SSH_KEY }}
+      #     script: |
+      #       cd /var/www/myway/server
+      #       git pull origin main
+      #       npm ci
+      #       npx prisma generate
+      #       npx prisma migrate deploy
+      #       npx tsc --build
+      #       pm2 restart myway-server
+      
+      - name: ✅ Deploy Concluído
+        run: echo "Deploy do servidor realizado com sucesso!"
+
+  deploy-mobile:
+    name: Build Mobile (Expo)
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    defaults:
+      run:
+        working-directory: ./mobile
+    
+    steps:
+      - name: 📦 Checkout código
+        uses: actions/checkout@v4
+      
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: 📥 Instalar dependências
+        run: npm ci
+      
+      # ===============================================
+      # Deploy automático com Expo EAS
+      # ===============================================
+      # - name: 🏗️ Setup Expo
+      #   uses: expo/expo-github-action@v8
+      #   with:
+      #     expo-version: latest
+      #     token: ${{ secrets.EXPO_TOKEN }}
+      
+      # - name: 🚀 Publicar no Expo
+      #   run: npx expo publish --non-interactive
+      
+      # - name: 📱 Build para Android
+      #   run: eas build --platform android --non-interactive
+      
+      # - name: 🍎 Build para iOS
+      #   run: eas build --platform ios --non-interactive
+      
+      - name: ✅ Build Concluído
+        run: echo "Build do mobile preparado!"

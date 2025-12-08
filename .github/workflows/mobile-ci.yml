@@ -1,0 +1,90 @@
+name: Mobile CI
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/mobile-ci.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/mobile-ci.yml'
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./mobile
+    
+    steps:
+      - name: 📦 Checkout código
+        uses: actions/checkout@v4
+      
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: mobile/package-lock.json
+      
+      - name: 📥 Instalar dependências
+        run: npm ci
+      
+      - name: 🧪 Executar testes
+        run: npm test -- --coverage --passWithNoTests
+      
+      - name: 📊 Upload coverage para Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./mobile/coverage/lcov.info
+          flags: mobile
+          name: mobile-coverage
+          fail_ci_if_error: false
+      
+      - name: 📈 Comentar cobertura no PR
+        if: github.event_name == 'pull_request'
+        uses: ArtiomTr/jest-coverage-report-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          working-directory: ./mobile
+          skip-step: all
+          coverage-file: ./mobile/coverage/coverage-summary.json
+          base-coverage-file: ./mobile/coverage/coverage-summary.json
+
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./mobile
+    
+    steps:
+      - name: 📦 Checkout código
+        uses: actions/checkout@v4
+      
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: mobile/package-lock.json
+      
+      - name: 📥 Instalar dependências
+        run: npm ci
+      
+      - name: 🔍 Verificar TypeScript
+        run: npx tsc --noEmit
+      
+      - name: ✅ Verificar formatação
+        run: |
+          if command -v prettier &> /dev/null; then
+            npx prettier --check "**/*.{ts,tsx,js,jsx,json}"
+          else
+            echo "Prettier não configurado, pulando..."
+          fi
